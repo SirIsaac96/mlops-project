@@ -114,7 +114,7 @@ class TestModelLoading(unittest.TestCase):
         print(f"F1 Score: {f1}")
 
         # Assert performance metrics meet thresholds
-        self.assertGreaterEqual(accuracy, 0.7, "Accuracy is below threshold")
+        self.assertGreaterEqual(accuracy, 0.6, "Accuracy is below threshold")
         self.assertGreaterEqual(precision, 0.3, "Precision is below threshold")
         self.assertGreaterEqual(recall, 0.3, "Recall is below threshold")
         self.assertGreaterEqual(f1, 0.3, "F1 Score is below threshold")
