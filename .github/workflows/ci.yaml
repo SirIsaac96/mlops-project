@@ -16,7 +16,7 @@ jobs:
 
           - name: Install dependencies
             run: |
-              python pip install --upgrade pip
+              python -m pip install --upgrade pip
               pip install -r requirements.txt
               pip install dvc
 
@@ -24,4 +24,3 @@ jobs:
             run: |
               # directly run the DVC pipeline without pulling
               dvc repro
-              
