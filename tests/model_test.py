@@ -1,0 +1,84 @@
+
+# Necessary libraries
+import unittest
+import mlflow
+from mlflow.tracking import MlflowClient
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import os
+import pandas as pd
+
+
+# Load DagsHub token from environment variables for secure access
+dagshub_token = os.getenv("DAGSHUB_TOKEN")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_TOKEN environment variable is not set")
+
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+
+# DagsHub repository details
+dagshub_url = "https://dagshub.com"
+repo_owner = "SirIsaac96"
+repo_name = "mlops-project"
+mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
+mlflow.set_experiment("Final_Model")
+
+
+# Specify the name of the model that we want to load and test
+model_name = "Best Model Staging" # model name registered in mlflow
+
+
+# Unit test class to test the loading of models from the staging stage in mlflow
+class TestModelLoading(unittest.TestCase):
+    """Unit test class to verify MLflow model loading from staging stage."""
+
+    def test_model_in_staging(self):
+        """Test if the model exists in the staging stage."""
+
+        # Initialize the MLflow client to interact with the MLflow server
+        client = MlflowClient()
+
+        # Retrieve the latest versions of the model in the staging stage
+        versions = client.get_latest_versions(model_name)
+
+        # Assert that at least one version of the model is in the staging stage
+        # If no versions are found, it will raise and error
+        self.assertGreater(len(versions), 0, "No model found in the 'Staging' stage.")
+
+    def test_model_loading(self):
+        """Test if the model can be loaded properly from the staging stage."""
+
+        # Initialize the MLflow client again to interact with the server
+        client = MlflowClient()
+
+        # Retrieve the latest versions of the model in the staging stage
+        versions = client.get_latest_versions(model_name)
+
+        # If no versions are found, fail the test and skip the model loading part
+        if not versions:
+            self.fail("No model found in the 'Staging' stage, skipping model loading test.")
+
+        # Get the version details of the latest model in the 'Staging' stage
+        latest_version = versions[0].version
+        run_id = versions[0].run_id # Retrieve the run ID of the model version
+
+        # Construct the string neede to load the model using the run ID
+        logged_model = f"runs:/{run_id}/Best_Model"
+
+        try:
+            # Try to load the model from the specified path
+            loaded_model = mlflow.pyfunc.load_model(logged_model)
+        except Exception as e:
+            # If loading the model fails, fail the test and output the error message
+            self.fail(f"Failed to load the model: {e}")
+
+        # Assert that the model is not None, meaning it was loaded successfully
+        self.assertIsNotNone(loaded_model, "The model is not None.")
+        print(f"Model successfully loaded from {loaded_model}.")
+
+
+# This ensures the tests run when executing the script directly
+if __name__ == "__main__":
+    unittest.main()
