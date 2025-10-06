@@ -1,0 +1,87 @@
+schema: '2.0'
+stages:
+  data_collection:
+    cmd: python src/data/data_collection.py
+    deps:
+    - path: src/data/data_collection.py
+      hash: md5
+      md5: 77896214fa3673c4ad780f86c6a16ec4
+      size: 2004
+    params:
+      params.yaml:
+        data_collection.test_size: 0.2
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: c0c2d65c14a603e91e029fda3c344a5c.dir
+      size: 522262
+      nfiles: 2
+  pre_preprocessing:
+    cmd: python src/data/data_prep.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: c0c2d65c14a603e91e029fda3c344a5c.dir
+      size: 522262
+      nfiles: 2
+    - path: src/data/data_prep.py
+      hash: md5
+      md5: d0af1dccaaff3f2e003b6a2d6ced211d
+      size: 1842
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: e34c84b2d0f2a75442271cd6c5779b7c.dir
+      size: 546895
+      nfiles: 2
+  model_building:
+    cmd: python src/model/model_building.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: e34c84b2d0f2a75442271cd6c5779b7c.dir
+      size: 546895
+      nfiles: 2
+    - path: src/model/model_building.py
+      hash: md5
+      md5: 08d43dd0a36c4f85755e63d1ef785012
+      size: 2023
+    params:
+      params.yaml:
+        model_building.n_estimators: 1000
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 4500245b6adb31fda8f33387516c3f44
+      size: 73619588
+  model_evaluation:
+    cmd: python src/model/model_eval.py
+    deps:
+    - path: models/model.pkl
+      hash: md5
+      md5: 4500245b6adb31fda8f33387516c3f44
+      size: 73619588
+    - path: src/model/model_eval.py
+      hash: md5
+      md5: 699c9265a3e567d5724a84f95e7dfb2a
+      size: 5319
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 868c2f4512aa4b200f92a413eaaa500d
+      size: 137
+    - path: reports/run_info.json
+      hash: md5
+      md5: e18e95b4c28cb5f8da8ddf07df6721b7
+      size: 87
+  model_registration:
+    cmd: python src/model/model_reg.py
+    deps:
+    - path: reports/run_info.json
+      hash: md5
+      md5: e18e95b4c28cb5f8da8ddf07df6721b7
+      size: 87
+    - path: src/model/model_reg.py
+      hash: md5
+      md5: 735630d77afc13fd3187f3b2dcd04368
+      size: 1112
