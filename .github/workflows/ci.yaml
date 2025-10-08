@@ -32,3 +32,22 @@ jobs:
              DAGSHUB_TOKEN: ${{secrets.DAGSHUB_TOKEN}}
             run: |
              python -m unittest tests/model_test.py
+
+          # Log in to DockerHub
+          - name: Log in to DockerHub
+            uses: docker/login-action@v2
+            with:
+              user: ${{secrets.DOCKER_USERNAME}}
+              password: ${{secrets.DOCKER_TOKEN}}
+
+          # Build the Docker Image
+          - name: Build Docker Image
+            if: ${{success()}}
+            run: |
+              docker build -t isaacotom/water-potability-predictor:latest .
+
+          # Push the Docker Image only if the build step was successful
+          - name: Push Docker Image
+            if: ${{success()}}
+            run: |
+              docker push isaacotom/water-potability-predictor:latest
